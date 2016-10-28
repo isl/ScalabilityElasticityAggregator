@@ -40,6 +40,9 @@ public class ScalabilityElasticityAggregator {
         KairosDbClient client = new KairosDbClient("http://localhost:8088");
         client = client.initializeFullBuilder(client);
 
+        KairosDbClient centralClient = new KairosDbClient("http://" +args[0]+ ":8088");
+        centralClient = centralClient.initializeFullBuilder(centralClient);
+
         // this is the SCALING POINT that we will take as a argument in the running of the jar
         Date scalingPoint = new Date(System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(15)); // 1st
         //for each of the services in case of precision we give the parameter -precision and then the name of the service and the two numbers
@@ -75,7 +78,7 @@ public class ScalabilityElasticityAggregator {
         double avgAmountInProvisionedResources = 2.0;
         double nsolv = 3;
 
-        System.out.println("Start retrieving and pushing metrics for scalability/elasticity");
+        System.out.println("Start retrieving and pushing metrics for scalability/elasticity in local KairosDB");
         http.retrieveScalabilityAdaptabilityMetrics(client, scalingPoint, serviceOfAdaptation, preciseNumberOfAdaptationsScales, totalTimesOfAdaptationScaling);
         http.retrieveElasticityAdaptabilityMetrics(client, scaleRequestStartPoint, scaleRequestEndPoint,
                 scaleOutRequestStartPoint, scaleOutRequestEndPoint,
@@ -83,7 +86,13 @@ public class ScalabilityElasticityAggregator {
                 avgAmountOutProvisionedResources, avgAmountInProvisionedResources,
                 nsolv);
 
-
+        System.out.println("Start retrieving and pushing metrics for scalability/elasticity in central KairosDB");
+        http.retrieveScalabilityAdaptabilityMetrics(centralClient, scalingPoint, serviceOfAdaptation, preciseNumberOfAdaptationsScales, totalTimesOfAdaptationScaling);
+        http.retrieveElasticityAdaptabilityMetrics(centralClient, scaleRequestStartPoint, scaleRequestEndPoint,
+                scaleOutRequestStartPoint, scaleOutRequestEndPoint,
+                scaleInRequestStartPoint, scaleInRequestEndPoint,
+                avgAmountOutProvisionedResources, avgAmountInProvisionedResources,
+                nsolv);
 
     }
 
